@@ -1,0 +1,79 @@
+---
+title: 'Statistical Inference Project Part 2: Basic Inferential Data Analysis'
+author: "P.Y.Fong"
+date: "12/24/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library (knitr)
+opts_chunk$set(cache =F,
+               echo = T,
+               message=F,
+               warning=F)
+```
+
+## Overview: 
+In the second part of the project, we analyze the ToothGrowth dataset from the R
+datasets package.  
+
+Loading Libraries and Data.  
+```{r Load}
+library(ggplot2)
+library(datasets)
+data(ToothGrowth)
+attach(ToothGrowth)
+```  
+
+## Exploration of dataset:  
+```{r}
+str(ToothGrowth)
+```
+ToothGrowth is a dataframe with 60 observations relating 3 variables which explores the effect of Vitamin C on tooth growth in Guinea Pigs.  
+
+Variables:  
+1. len -     numeric    Tooth length. (response variable).  
+2. supp -    factor     Supplement type. OJ(Orange Juice) or VC (Ascorbic Acid).  
+3. dose -    numeric    Dose in milligrams/day.  
+
+Information about the dataset can be found at  
+<https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/ToothGrowth.html>
+
+```{r}
+ggplot(data=ToothGrowth, aes(x=as.factor(dose), y=len, fill=supp)) +
+    geom_bar(stat="identity") +
+    facet_grid(. ~ supp) +
+    xlab("Dose (mg/day)") +
+    ylab("Tooth length") +
+    guides(fill=guide_legend(title="Supplement type"))
+```
+
+From the above plots, there is a clear positive correlation between tooth length and daily Vitamin C dosage for both supplement types.  
+  
+**The question to be addressed then should be, whether the supplement type (i.e. OJ-orange juice or VC-ascorbic acid) has any effect on tooth length.**
+
+## Analysis
+### Hypothesis evaluation using the Welch Two Sample t-test:  
+* Null Hypothesis: No significant difference between the means of `Supplement Type` and `Tooth Length`.  
+    + H~o~: mean(VC) = mean (OJ).
+* Alt Hypothesis: Significant difference between `Supplement Type` and `Tooth Length`.  
+    + H~a~: mean(VC) <> mean (OJ).
+
+### Assumptions:
+1. The sample population, i.e. the 60 guinea pigs, are representative of the population of guinea pigs in order to generalize the results.  
+2. Observations were made based on random assignment of guinea pigs.  
+3. Variances in the samples are assumed to be different for the groups differentiated by supplement Type.  
+
+### Testing:
+```{r warning=FALSE, error=FALSE}
+t.test(len ~ supp, paired = F, var.equal = F, data = ToothGrowth)
+```
+The 95% confidence interval is **[-0.1710156, 7.5710156]**.  
+The `p` value = **0.06063**, > 0.05 (alpha =5%).  
+
+## Decision: **Fail to reject H~o~.**  
+
+## Conclusions:  
+
+1. Dosage is positively correlated to increase in Tooth Length.  
+2. Supplement Type` has no significant impact on Tooth Length with 95% confidence.
